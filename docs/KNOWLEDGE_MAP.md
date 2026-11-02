@@ -1,0 +1,15 @@
+# Knowledge Map
+
+Open **Knowledge map** in the sidebar (`/knowledge-map`). It starts focused on the departing person, where available. Choose Everyone to explore the team, or filter to a specific person. Select a person, system, procedure or document to highlight the related claims and read their exact quotes, review notes and source links. Open **Review or correct** to use the existing document review workflow. Ask the Analyst about the selected item without changing screens.
+
+Solid edges represent reviewer-confirmed claims; dashed edges still need review. Rejected claims never appear. The graph is built only from saved relationships, not text mentions or invented ownership. Source edges connect the responsibility to the cited document; they are not an additional operational ownership claim. Each edge retains its underlying claim ID internally. Parallel claims from separate sources remain separate, even when they connect the same nodes.
+
+This is a navigable, keyboard-accessible graph with native node buttons, a scrollable canvas, and zoom controls. It uses SVG paths and the existing theme, without a new graph dependency. Long names wrap within node cards; source details remain text and links in the adjacent panel (below the graph on narrower screens). Navigation preserves filters and selection in the URL. No database migration or graph database is needed.
+
+`get-knowledge-map` is the shared read action for UI and agent. Inputs: optional workspaceId, personId, nodeId, and confirmedOnly (defaults false). It authorizes the workspace and filters every query by authenticated owner/org/workspace. Person and selected-node validation reject unavailable records. Outputs: typed nodes, edges, selectedNode, selectedClaims, claimCount and hasMore. It returns at most 150 relationships; hasMore warns that coverage is incomplete. Quotes and review notes are included only for the selected node in the response. It does not change reviews, assignments, tests or readiness.
+
+Navigation view is knowledge-map. State includes selectedMapNodeId, selectedPersonId, mapConfirmedOnly and mapAllPeople. view-screen returns the same filtered graph and selected-node evidence. The Analyst's first-turn tools include get-knowledge-map. An absent connection or a single visible owner does not establish a knowledge silo, missing backup, risk severity or readiness: source coverage can be incomplete. Risk assessment remains a separate feature.
+
+Verification: scripts/smoke-knowledge-map.mjs exercises authenticated read-only local actions, typed endpoint integrity, exact source quotes, person/node/document selection, confirmed-only filtering, rejected-claim exclusion, authorization, route availability and unchanged verification records. The live saved data check returned 12 nodes and 12 edges. tests/knowledge-map.test.tsx verifies selectable node names without internal IDs, keyboard focus, review styles and agent navigation. Both focused tests passed.
+
+Final typecheck and Agent-Native doctor passed. Visual browser QA remains pending because the browser runtime fails during connection with `Cannot redefine property: process`.

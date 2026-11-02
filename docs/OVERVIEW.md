@@ -1,0 +1,21 @@
+# Overview dashboard
+
+Overview (`/overview`) is the signed-in landing. The existing `/workspace` remains the team/system view, and `/home` remains the starter help page. Overview brings together departure dates, critical system count, open high-priority risks, confirmed unfinished assignments, separate draft suggestions, latest reported runbook attempts, ownership concentration candidates and recent saved activity. Cards and queue items link to their existing workflows. Refresh and the contextual Analyst use the same saved data.
+
+`get-overview` is a shared read-only action with optional workspaceId. It authorizes through the workspace service, then reads one PostgreSQL repeatable-read/read-only transaction. Counts are database aggregates over the full authorized workspace, never the length of a capped graph or list. No records are created, approved, resolved or marked ready by opening the dashboard. Missing workspaces return an empty setup view; unauthenticated/foreign workspace reads fail closed.
+
+Metric definitions:
+
+- Critical systems: saved system criticality is critical.
+- Open risks: proposed or accepted; rejected and resolved are excluded. High priority means critical/high among those open findings. Proposals remain labelled proposals.
+- Pending assignments: confirmed tasks whose status is not done. Suggested tasks are counted separately, even when a date/owner is suggested. Overdue means an unfinished confirmed task has a calendar deadline before today in Africa/Lagos.
+- Test outcomes: the latest-created run per source document (createdAt, with id as a deterministic tie-breaker). Open retests replace older passes in this summary. Finalized outcomes include passed, passed_with_gaps and failed. These are human-reported outcomes, not independent validation or proof of readiness.
+- Ownership candidates: one distinct person among non-rejected owns claims for a system/process. Multiple sources naming the same person count once. Other relationship types do not establish ownership. A candidate does not prove exclusive ownership or that a backup is missing; source coverage may be incomplete.
+
+Lists are intentionally bounded: five top open risks, five confirmed upcoming tasks, five ownership candidates, six latest runbook attempts, and ten recent activity entries. Full aggregate counts remain accurate beyond these limits. Source quotes, large notes, task descriptions and verification step arrays are loaded only through existing detail workflows. The service uses existing workspace/list indexes and adds no migration or dependency.
+
+Recent activity shows a localized event label, an optional short subject and local date/time. Raw reviewer notes, database statuses, IDs and actor emails are not exposed as feed copy. Existing events do not reliably distinguish agent work from human work, so the feed is labelled workspace activity and does not invent attribution. Links open the relevant source area rather than claiming exact entity links that the historical audit schema does not store.
+
+Navigation view is overview. It carries the activeWorkspaceId; view-screen returns the same snapshot, and get-overview is available in the Analyst's initial tools. Agent instructions preserve the distinction between proposals, reported results and confirmed assignments. The page uses action-query invalidation after local/agent writes, with manual refresh; no extra background polling or remote collaboration transport is added.
+
+Verification: tests/overview.integration.test.ts applies all real migrations to isolated in-memory PGlite. Five tests cover more than 100 risk records, suggested/confirmed task separation, overdue dates, rejected/multi-owner claim exclusion, latest-per-document retests, reported failed/gapped outcomes, no writes, human-review changes, tenant scope, empty workspaces, Lagos calendar boundaries and activity formatting. Two focused UI tests check readable labels/links, separate suggestions, refresh and agent navigation. scripts/smoke-overview.mjs passed read-only checks on the real local server, including route and authenticated landing behavior. Typecheck and Agent-Native doctor passed. Browser visual QA remains pending because connection fails with `Cannot redefine property: process`.

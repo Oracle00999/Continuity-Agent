@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.pdf binary
+# Markdown uses trailing spaces for intentional hard line breaks.
+*.md whitespace=-blank-at-eol
