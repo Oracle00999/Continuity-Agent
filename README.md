@@ -5,6 +5,7 @@ and human-reviewed departure plans. Built with Agent-Native.
 
 - [Run locally and explore the project](docs/GETTING_STARTED.md)
 - [Demo walkthrough](docs/DEMO_WALKTHROUGH.md)
+- [Hackathon pitch slides (PDF)](docs/slides/Continuity-Pitch.pdf)
 - [Fictional handover PDF](output/pdf/Northstar-Digital-Operations-Handover.pdf)
 - [Testing](docs/VISUAL_TESTING.md)
 
